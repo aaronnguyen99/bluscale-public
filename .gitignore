@@ -1,0 +1,6 @@
+# Internal design handoff — kept local, not published to the public site
+landing_handoff/
+
+# OS / editor cruft
+.DS_Store
+Thumbs.db

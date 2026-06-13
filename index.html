@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>BluscaleAI — Read blueprints. Take off quantities. Automatically.</title>
+<meta name="description" content="BluscaleAI is a Windows desktop tool that reads DWG & DXF blueprints and helps you take off quantities — poché detection, grid-based takeoff to CSV, layer and pattern inspection. Free beta." />
+<meta name="theme-color" content="#0d0f13" />
+<link rel="icon" type="image/png" sizes="32x32" href="assets/favicon-32.png" />
+<link rel="apple-touch-icon" sizes="256x256" href="assets/icon-256.png" />
+<meta property="og:type" content="website" />
+<meta property="og:site_name" content="BluscaleAI" />
+<meta property="og:title" content="BluscaleAI — Read blueprints. Take off quantities. Automatically." />
+<meta property="og:description" content="Windows desktop tool that reads DWG & DXF blueprints and helps you take off quantities. Free beta." />
+<meta property="og:image" content="assets/icon-256.png" />
+<meta name="twitter:card" content="summary" />
+<style>
+  :root{
+    --void:#0a0b0e; --bg:#0d0f13; --panel:#15181e; --panel2:#1c2028;
+    --line:#272c35; --lineSoft:#1e222a;
+    --txt:#e7e9ed; --txt2:#9aa2ae; --txt3:#646c78;
+    --accent:#2f81f7; --accentDeep:#1f6feb; --deep:#1452c4; --sky:#7fb2ff;
+    --green:#3fb950;
+    --ui:-apple-system,'Segoe UI',system-ui,sans-serif;
+    --mono:ui-monospace,'SF Mono','JetBrains Mono',Menlo,monospace;
+    --maxw:1120px;
+  }
+  *{box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+  body{margin:0;background:var(--bg);color:var(--txt);font-family:var(--ui);
+    -webkit-font-smoothing:antialiased;line-height:1.5;overflow-x:hidden;}
+  a{color:inherit;text-decoration:none;}
+  .wrap{max-width:var(--maxw);margin:0 auto;padding:0 28px;}
+  .mono{font-family:var(--mono);}
+
+  /* ---------- nav ---------- */
+  header{position:sticky;top:0;z-index:50;
+    background:rgba(13,15,19,0.72);backdrop-filter:blur(14px);
+    border-bottom:1px solid transparent;transition:border-color .2s;}
+  header.scrolled{border-bottom-color:var(--line);}
+  .nav{display:flex;align-items:center;height:64px;gap:28px;}
+  .brand{display:flex;align-items:center;gap:10px;font-weight:680;font-size:18px;letter-spacing:-0.3px;}
+  .brand .ai{color:var(--accent);}
+  .nav-links{display:flex;gap:26px;margin-left:14px;}
+  .nav-links a{font-size:14px;color:var(--txt2);font-weight:500;}
+  .nav-links a:hover{color:var(--txt);}
+  .nav-right{margin-left:auto;display:flex;align-items:center;gap:14px;}
+
+  .btn{display:inline-flex;align-items:center;justify-content:center;gap:9px;
+    font-family:var(--ui);font-weight:600;cursor:pointer;border:none;white-space:nowrap;
+    border-radius:10px;transition:transform .08s, background .15s, border-color .15s;}
+  .btn:active{transform:translateY(1px);}
+  .btn-primary{background:var(--accentDeep);color:#fff;height:44px;padding:0 22px;font-size:14.5px;
+    box-shadow:0 1px 0 rgba(0,0,0,.3),0 10px 28px -10px rgba(31,111,235,.75);}
+  .btn-primary:hover{background:#2877f0;}
+  .btn-primary.sm{height:38px;padding:0 16px;font-size:13.5px;}
+  .btn-ghost{background:var(--panel2);color:var(--txt);height:44px;padding:0 20px;font-size:14.5px;
+    border:1px solid var(--line);}
+  .btn-ghost:hover{border-color:#39414d;}
+  .btn-ghost.sm{height:38px;padding:0 16px;font-size:13.5px;}
+
+  /* ---------- hero ---------- */
+  .hero{position:relative;padding:90px 0 0;text-align:center;overflow:hidden;}
+  .hero-bg{position:absolute;inset:0;pointer-events:none;}
+  .hero-grid{position:absolute;inset:0;opacity:.5;
+    background-image:linear-gradient(var(--line) 1px,transparent 1px),linear-gradient(90deg,var(--line) 1px,transparent 1px);
+    background-size:46px 46px;
+    -webkit-mask-image:radial-gradient(120% 80% at 50% 0%,#000 20%,transparent 70%);
+            mask-image:radial-gradient(120% 80% at 50% 0%,#000 20%,transparent 70%);}
+  .hero-glow{position:absolute;top:-220px;left:50%;transform:translateX(-50%);
+    width:900px;height:520px;border-radius:50%;
+    background:radial-gradient(circle,rgba(47,129,247,0.28),transparent 62%);filter:blur(20px);}
+  .eyebrow{position:relative;display:inline-flex;align-items:center;gap:9px;height:30px;padding:0 14px;
+    border-radius:999px;background:rgba(47,129,247,0.10);border:1px solid rgba(47,129,247,0.32);
+    color:#9ec5ff;font-size:12.5px;font-weight:600;font-family:var(--mono);margin-bottom:26px;}
+  .eyebrow .dot{width:6px;height:6px;border-radius:999px;background:var(--green);}
+  h1{position:relative;margin:0 auto;font-size:clamp(38px,6vw,68px);line-height:1.04;
+    font-weight:720;letter-spacing:-2px;max-width:14ch;text-wrap:balance;}
+  h1 .hl{color:var(--sky);}
+  .sub{position:relative;margin:22px auto 0;max-width:50ch;font-size:clamp(15px,2vw,18.5px);
+    color:var(--txt2);text-wrap:pretty;}
+  .cta{position:relative;margin-top:34px;display:flex;gap:14px;justify-content:center;flex-wrap:wrap;}
+  .cta-note{position:relative;margin-top:16px;font-size:12.5px;color:var(--txt3);font-family:var(--mono);}
+
+  /* ---------- product shot ---------- */
+  .shot-wrap{position:relative;margin:64px auto 0;max-width:1000px;padding:0 28px;}
+  .shot{position:relative;border-radius:14px;overflow:hidden;border:1px solid var(--line);
+    background:var(--panel);
+    box-shadow:0 40px 120px -30px rgba(0,0,0,.9),0 0 0 1px rgba(255,255,255,.02) inset,
+      0 -1px 60px -20px rgba(47,129,247,.4);}
+  .shot img{display:block;width:100%;height:auto;}
+  .shot-fade{position:absolute;left:0;right:0;bottom:0;height:120px;
+    background:linear-gradient(180deg,transparent,var(--bg));pointer-events:none;}
+
+  /* ---------- sections ---------- */
+  section{position:relative;}
+  .sec-pad{padding:96px 0;}
+  .sec-head{text-align:center;max-width:60ch;margin:0 auto 56px;}
+  .sec-eyebrow{font-size:12px;font-weight:600;letter-spacing:1.6px;text-transform:uppercase;
+    color:var(--accent);font-family:var(--mono);}
+  h2{margin:14px 0 0;font-size:clamp(26px,3.6vw,40px);font-weight:700;letter-spacing:-1px;}
+  .sec-head p{margin:14px 0 0;color:var(--txt2);font-size:16px;}
+
+  .features{display:grid;grid-template-columns:repeat(3,1fr);gap:20px;}
+  .feat{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:28px;}
+  .feat-ico{width:46px;height:46px;border-radius:11px;display:grid;place-items:center;margin-bottom:18px;
+    background:rgba(47,129,247,0.12);border:1px solid rgba(47,129,247,0.3);}
+  .feat h3{margin:0 0 8px;font-size:17px;font-weight:650;letter-spacing:-0.2px;}
+  .feat p{margin:0;color:var(--txt2);font-size:14px;line-height:1.6;}
+
+  /* ---------- download band ---------- */
+  .dl{position:relative;text-align:center;border-radius:24px;padding:64px 32px;overflow:hidden;
+    background:linear-gradient(160deg,#11305f,#0b1f44 55%,#0a0f1c);
+    border:1px solid var(--line);}
+  .dl-grid{position:absolute;inset:0;opacity:.4;
+    background-image:linear-gradient(rgba(47,129,247,.2) 1px,transparent 1px),linear-gradient(90deg,rgba(47,129,247,.2) 1px,transparent 1px);
+    background-size:42px 42px;
+    -webkit-mask-image:radial-gradient(80% 80% at 50% 40%,#000,transparent 75%);
+            mask-image:radial-gradient(80% 80% at 50% 40%,#000,transparent 75%);}
+  .dl h2{position:relative;}
+  .dl p{position:relative;margin:14px auto 0;color:#aebfd8;max-width:46ch;font-size:15.5px;}
+  .dl .cta{margin-top:30px;}
+  .dl-req{position:relative;margin-top:18px;font-size:12.5px;color:#6b88b3;font-family:var(--mono);}
+
+  /* ---------- footer ---------- */
+  footer{border-top:1px solid var(--line);padding:40px 0;margin-top:96px;}
+  .foot{display:flex;align-items:center;gap:18px;flex-wrap:wrap;}
+  .foot .brand{font-size:15px;}
+  .foot-links{display:flex;gap:22px;margin-left:auto;}
+  .foot-links a{font-size:13px;color:var(--txt3);}
+  .foot-links a:hover{color:var(--txt2);}
+  .foot-copy{font-size:12.5px;color:var(--txt3);font-family:var(--mono);width:100%;margin-top:8px;}
+
+  /* ---------- responsive ---------- */
+  @media(max-width:780px){
+    .nav-links{display:none;}
+    .features{grid-template-columns:1fr;}
+    .sec-pad{padding:64px 0;}
+    .hero{padding:60px 0 0;}
+    .foot-links{margin-left:0;width:100%;}
+  }
+</style>
+</head>
+<body>
+
+<!-- ============ NAV ============ -->
+<header id="hdr">
+  <div class="wrap nav">
+    <a class="brand" href="#top">
+      <svg width="26" height="26" viewBox="0 0 96 96" fill="none">
+        <defs><linearGradient id="nm" x1="0" y1="0" x2="0" y2="96" gradientUnits="userSpaceOnUse">
+          <stop stop-color="#2f81f7"/><stop offset="1" stop-color="#1452c4"/></linearGradient></defs>
+        <rect width="96" height="96" rx="22" fill="url(#nm)"/>
+        <g stroke="#fff" stroke-opacity="0.30" stroke-width="2.4">
+          <line x1="32" y1="20" x2="32" y2="76"/><line x1="64" y1="20" x2="64" y2="76"/>
+          <line x1="20" y1="40" x2="76" y2="40"/><line x1="20" y1="62" x2="76" y2="62"/></g>
+        <circle cx="64" cy="40" r="12" fill="#fff"/>
+        <text x="64" y="44.6" font-family="ui-monospace,Menlo,monospace" font-size="14" font-weight="700" fill="#1452c4" text-anchor="middle">B</text>
+        <circle cx="32" cy="62" r="4" fill="#fff" fill-opacity="0.92"/>
+      </svg>
+      <span>Bluscale<span class="ai">AI</span></span>
+    </a>
+    <nav class="nav-links">
+      <a href="#features">Features</a>
+      <a href="#download">Download</a>
+    </nav>
+    <div class="nav-right">
+      <a class="btn btn-primary sm" href="#download">Get the beta</a>
+    </div>
+  </div>
+</header>
+
+<!-- ============ HERO ============ -->
+<a id="top"></a>
+<section class="hero">
+  <div class="hero-bg">
+    <div class="hero-grid"></div>
+    <div class="hero-glow"></div>
+  </div>
+  <div class="wrap">
+    <span class="eyebrow"><span class="dot"></span>Beta · Windows · DWG &amp; DXF</span>
+    <h1>Read blueprints. Take off quantities. <span class="hl">Automatically.</span></h1>
+    <div class="cta">
+      <a class="btn btn-primary" href="#download">Download the beta</a>
+    </div>
+    <div class="cta-note">Free beta · Windows 10/11 · early build — expect rough edges</div>
+  </div>
+
+  <div class="shot-wrap">
+    <div class="shot">
+      <img src="assets/app-shot.png" alt="BluscaleAI reading a structural blueprint with detected poché and openings" />
+      <div class="shot-fade"></div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ FEATURES ============ -->
+<section id="features" class="sec-pad">
+  <div class="wrap">
+    <div class="sec-head">
+      <div class="sec-eyebrow">What it does</div>
+      <h2>Built for blueprint takeoff</h2>
+      <p>A set of tools to help you work through a CAD drawing toward a quantity takeoff.</p>
+    </div>
+    <div class="features">
+      <div class="feat">
+        <div class="feat-ico">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#7fb2ff" stroke-width="1.7">
+            <rect x="3.5" y="3.5" width="17" height="17" rx="2"/>
+            <path d="M7 17 17 7 M11 17 17 11 M7 13 13 7"/></svg>
+        </div>
+        <h3>Poché detection</h3>
+        <p>Helps surface filled-wall hatch patterns and openings across layers, so there's
+          less to trace by hand.</p>
+      </div>
+      <div class="feat">
+        <div class="feat-ico">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#7fb2ff" stroke-width="1.7">
+            <path d="M4 4v16h16"/><rect x="7" y="12" width="3" height="5"/><rect x="12" y="8" width="3" height="9"/><rect x="17" y="5" width="3" height="12"/></svg>
+        </div>
+        <h3>Grid-based takeoff to CSV</h3>
+        <p>Organize quantities by your drawing's structural grid and axis labels, and export
+          them to a CSV.</p>
+      </div>
+      <div class="feat">
+        <div class="feat-ico">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#7fb2ff" stroke-width="1.7">
+            <path d="M12 3 21 8 12 13 3 8 12 3Z"/><path d="M3 13 12 18 21 13"/></svg>
+        </div>
+        <h3>DWG &amp; DXF</h3>
+        <p>Open model and paper-space layouts, toggle layers and patterns, crop to a region, and
+          inspect an element's properties.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ DOWNLOAD ============ -->
+<section id="download" class="sec-pad" style="padding-top:0;">
+  <div class="wrap">
+    <div class="dl">
+      <div class="dl-grid"></div>
+      <h2>Try the beta</h2>
+      <p>Grab the Windows build and give it a run on your own drawings. No account needed.</p>
+      <div class="cta">
+        <!-- Points at the "latest release" asset on this repo. The uploaded installer
+             must be named exactly BluscaleAI-beta-setup.exe for this link to resolve. -->
+        <a class="btn btn-primary" href="https://github.com/aaronnguyen99/bluscale-public/releases/latest/download/BluscaleAI-beta-setup.exe">Download for Windows</a>
+      </div>
+      <div class="dl-req">Windows 10/11 64-bit · beta build — things may change</div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ FOOTER ============ -->
+<footer>
+  <div class="wrap foot">
+    <a class="brand" href="#top">
+      <svg width="22" height="22" viewBox="0 0 96 96" fill="none">
+        <rect width="96" height="96" rx="22" fill="url(#nm)"/>
+        <g stroke="#fff" stroke-opacity="0.30" stroke-width="3"><line x1="34" y1="18" x2="34" y2="78"/><line x1="20" y1="44" x2="78" y2="44"/></g>
+        <circle cx="60" cy="44" r="17" fill="#fff"/>
+        <text x="60" y="50.5" font-family="ui-monospace,Menlo,monospace" font-size="21" font-weight="700" fill="#1452c4" text-anchor="middle">B</text>
+      </svg>
+      <span>Bluscale<span class="ai">AI</span></span>
+    </a>
+    <div class="foot-links">
+      <a href="#features">Features</a>
+      <a href="#download">Download</a>
+      <a href="#">Privacy</a>
+      <a href="#">Contact</a>
+    </div>
+    <div class="foot-copy">© 2026 BluscaleAI · Beta build</div>
+  </div>
+</footer>
+
+<script>
+  // sticky nav border on scroll
+  const hdr = document.getElementById('hdr');
+  const onScroll = () => hdr.classList.toggle('scrolled', window.scrollY > 8);
+  onScroll(); window.addEventListener('scroll', onScroll, {passive:true});
+</script>
+</body>
+</html>
