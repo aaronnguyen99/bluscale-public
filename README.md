@@ -14,7 +14,8 @@ blueprint-takeoff app (reads DWG/DXF, helps extract quantities).
    `aaronnguyen99.github.io`).
 
 ## Download wiring
-The "Download for Windows" button links to:
+The public download button was withdrawn on 2026-10-02 (pilot access by invitation).
+The Release asset stays because installed copies auto-update from it (electron-updater `latest.yml`):
 
 ```
 https://github.com/aaronnguyen99/bluscale-public/releases/latest/download/BluscaleAI-beta-setup.exe
