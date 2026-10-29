@@ -1,6 +1,6 @@
 # bluscale-public
 
-Public marketing site **and** Windows release host for **BluscaleAI** — the desktop
+Public marketing site for **BluscaleAI** — the desktop
 blueprint-takeoff app (reads DWG/DXF, helps extract quantities).
 
 ## Contents
@@ -12,15 +12,3 @@ blueprint-takeoff app (reads DWG/DXF, helps extract quantities).
 2. Set the custom domain there (writes a `CNAME`); enable **Enforce HTTPS**.
 3. Point DNS at GitHub Pages (apex `A` records `185.199.108–111.153`; `www` CNAME to
    `aaronnguyen99.github.io`).
-
-## Download wiring
-The public download button was withdrawn on 2026-10-02 (pilot access by invitation).
-The Release asset stays because installed copies auto-update from it (electron-updater `latest.yml`):
-
-```
-https://github.com/aaronnguyen99/bluscale-public/releases/latest/download/BluscaleAI-beta-setup.exe
-```
-
-Publish the installer as a **Release** asset named exactly `BluscaleAI-beta-setup.exe`.
-Keeping that filename constant across releases means the link always resolves to the
-newest build.
